@@ -26,4 +26,4 @@ class User(AbstractBaseUser, models.Model):
             self.set_password(kwargs['password'])
 
     def __str__(self):
-        return self.name
+        return self.user_code

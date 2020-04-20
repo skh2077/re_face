@@ -1,3 +1,7 @@
 static/
-reface/
+logs/
 manage.py
+__pycache__/
+migrations/
+reface/
+

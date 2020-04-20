@@ -18,9 +18,19 @@ def UserResponse(request, url=None, extra=None):
     elif request.method == 'POST':
         authorized, authorize_object, response, request = base.Authorize_session(request)
         if authorized:
+            landmark = request.pop('landmark_file',None)
+            rebuild = request.pop('rebuild_file',None)
+            origin = request.pop('origin_picture',None)
             newuser = UserSerializer(request)
             if newuser.is_valid():
-                newuser.save()
+                newuserobj = newuser.save()
+                if landmark:
+                    newuserobj.landmark_file = landmark[0]
+                if rebuild:
+                    newuserobj.rebuild_file=rebuild[0]
+                if origin:
+                    newuserobj.origin_picture= origin[0]
+                newuserobj.save()
                 return base.Custom_Response(201,newuser.data)
             else:
                 return base.Custom_Response(406,newuser.errors)

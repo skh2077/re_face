@@ -1,0 +1,6 @@
+[submodule "APDrawingGAN"]
+	path = APDrawingGAN
+	url = https://github.com/yiranran/APDrawingGAN.git
+[submodule "SC-FEGAN"]
+	path = SC-FEGAN
+	url = https://github.com/run-youngjoo/SC-FEGAN.git
