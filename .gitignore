@@ -1,0 +1,6 @@
+static/
+logs/
+manage.py
+__pycache__/
+migrations/
+
