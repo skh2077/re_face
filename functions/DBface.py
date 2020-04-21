@@ -7,10 +7,6 @@ import torch.nn as nn
 import cv2
 import sys
 
-sys.path.append('..')
-dbface = __import__('DBFace.model.DBFace')
-
-
 HAS_CUDA = torch.cuda.is_available()
 
 
@@ -85,54 +81,3 @@ def detect_image(model, file):
 
     common.imwrite("detect_result/" + common.file_name_no_suffix(file) + ".draw.jpg", image)
 
-
-def image_demo():
-
-    dbface = dbface.model.DBFace.DBFace()
-    dbface.eval()
-
-    if HAS_CUDA:
-        dbface.cuda()
-
-    dbface.load("model/dbface.pth")
-    detect_image(dbface, "datas/selfie.jpg")
-    detect_image(dbface, "datas/12_Group_Group_12_Group_Group_12_728.jpg")
-
-
-def camera_demo():
-
-    dbface = dbface.model.DBFace.DBFace()
-    dbface.eval()
-
-    if HAS_CUDA:
-        dbface.cuda()
-
-    dbface.load("model/dbface.pth")
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    ok, frame = cap.read()
-
-    while ok:
-        objs = detect(dbface, frame)
-
-        for obj in objs:
-            common.drawbbox(frame, obj)
-
-        cv2.imshow("demo DBFace", frame)
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            break
-
-        ok, frame = cap.read()
-    
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    image_demo()
-    camera_demo()
-    
-
-
-    
