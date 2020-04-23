@@ -92,4 +92,4 @@ def image_demo():
 
     dbface.load("../DBFace/model/dbface.pth")
     print('loaded')
-    detect_image(dbface, "samples/img_1701.png")
+    detect_image(dbface, "samples/images.jpg")
