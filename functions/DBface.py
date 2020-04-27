@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import cv2
+from imutils.face_utils import FaceAligner
 import sys
 
 HAS_CUDA = torch.cuda.is_available()
@@ -69,6 +70,37 @@ def detect(model, image, threshold=0.4, nms_iou=0.5):
         objs.append(dbfacecommon.common.BBox(0, xyrb=xyrb, score=score, landmark=box_landmark))
     return nms(objs, iou=nms_iou)
 
+def facealligner(image, leftEyeCenter,rightEyeCenter,desiredLeftEye=(0.35, 0.35),desiredFaceWidth=256, desiredFaceHeight=None):
+
+    dY = rightEyeCenter[1] - leftEyeCenter[1]
+    dX = rightEyeCenter[0] - leftEyeCenter[0]
+    angle = np.degrees(np.arctan2(dY, dX)) - 180
+
+    desiredRightEyeX = 1.0 - desiredLeftEye[0]
+
+    dist = np.sqrt((dX ** 2) + (dY ** 2))
+    desiredDist = (desiredRightEyeX - desiredLeftEye[0])
+    desiredDist *= desiredFaceWidth
+    scale = desiredDist / dist
+
+    eyesCenter = ((leftEyeCenter[0] + rightEyeCenter[0]) // 2,
+        (leftEyeCenter[1] + rightEyeCenter[1]) // 2)
+
+    M = cv2.getRotationMatrix2D(eyesCenter, angle, scale)
+
+    # update the translation component of the matrix
+    tX = desiredFaceWidth * 0.5
+    tY = desiredFaceHeight * desiredLeftEye[1]
+    M[0, 2] += (tX - eyesCenter[0])
+    M[1, 2] += (tY - eyesCenter[1])
+
+    # apply the affine transformation
+    (w, h) = (desiredFaceWidth, desiredFaceHeight)
+    output = cv2.warpAffine(image, M, (w, h),
+        flags=cv2.INTER_CUBIC)
+    cv2.imwrite("detect_result/" + 'alligned' + ".png", output)
+
+    return output
 
 def detect_image(model, file):
 
@@ -76,10 +108,11 @@ def detect_image(model, file):
     objs = detect(model, image)
 
     for obj in objs:
+        print(obj.landmark)
         dbfacecommon.common.drawbbox(image, obj)
+        facealligner(image, obj.landmark)
 
     dbfacecommon.common.imwrite("detect_result/" + dbfacecommon.common.file_name_no_suffix(file) + ".draw.jpg", image)
-
 
 
 def image_demo():
