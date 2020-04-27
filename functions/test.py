@@ -70,6 +70,7 @@ if __name__ == '__main__':
                             model='test', dataset_mode='single', norm='batch', which_epoch=300, gpu_ids='-1')
     print(opt.parser.parse_args())
     opt = opt.parse()
+    opt.use_local = True
     opt.num_threads = 1   # test code only supports num_threads = 1
     opt.batch_size = 1  # test code only supports batch_size = 1
     opt.serial_batches = True  # no shuffle

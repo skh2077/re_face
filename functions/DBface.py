@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import cv2
 import sys
-
+import os
 HAS_CUDA = torch.cuda.is_available()
 sys.path.append('..')
 dbfacemod = __import__('DBFace.model.DBFace')
@@ -69,7 +69,7 @@ def detect(model, image, threshold=0.4, nms_iou=0.5):
         objs.append(dbfacecommon.common.BBox(0, xyrb=xyrb, score=score, landmark=box_landmark))
     return nms(objs, iou=nms_iou)
 
-def facealligner(image, leftEyeCenter,rightEyeCenter,desiredLeftEye=(0.35, 0.35),desiredFaceWidth=256, desiredFaceHeight=256):
+def facealligner(image, leftEyeCenter,rightEyeCenter,desiredLeftEye=(0.35, 0.35),desiredFaceWidth=512, desiredFaceHeight=512):
 
     dY = rightEyeCenter[1] - leftEyeCenter[1]
     dX = rightEyeCenter[0] - leftEyeCenter[0]
@@ -124,4 +124,7 @@ def image_demo():
 
     dbface.load("../DBFace/model/dbface.pth")
     print('loaded')
-    detect_image(dbface, "samples/images.jpg")
+    arr = os.listdir("detect_result")
+    for filename in arr:
+        print(filename)
+        detect_image(dbface, "detect_result/"+filename)
