@@ -4,4 +4,4 @@ manage.py
 __pycache__/
 migrations/
 reface/
-
+checkpoints/
