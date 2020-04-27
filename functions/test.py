@@ -1,19 +1,74 @@
 import os
 import sys
 import importlib
-sys.path.append('../APDrawingGAN/')
+import argparse
 
+sys.path.append('../APDrawingGAN/')
+sys.path.append('../APDrawingGAN/models')
+sys.path.append('..')
 utilhtml = importlib.import_module('APDrawingGAN.util.html')
 utilvisualizer = importlib.import_module('APDrawingGAN.util.visualizer')
 apdata = importlib.import_module('APDrawingGAN.data')
 optionstest = importlib.import_module('APDrawingGAN.options.test_options')
 apmodel = importlib.import_module('APDrawingGAN.models')
 
+class Options(optionstest.TestOptions):
+    def __init__(self,parser):
+        self.parser = parser
+        super().initialize(self.parser)
+
+    def gather_options(self):
+        # initialize parser with basic options
+        if not self.initialized:
+            parser = argparse.ArgumentParser(
+                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+            parser = self.initialize(parser)
+        else:
+            parser = self.parser
+
+        # get the basic options
+        opt, _ = parser.parse_known_args()
+
+        # modify model-related parser options
+        model_name = opt.model
+        model_option_setter = apmodel.get_option_setter(model_name)
+        parser = model_option_setter(parser, self.isTrain)
+        opt, _ = parser.parse_known_args()  # parse again with the new defaults
+
+        # modify dataset-related parser options
+        dataset_name = opt.dataset_mode
+        dataset_option_setter = apdata.get_option_setter(dataset_name)
+        parser = dataset_option_setter(parser, self.isTrain)
+
+        self.parser = parser
+
+        return parser.parse_args()
+
+def remove_option(parser, arg):
+    for action in parser._actions:
+        if (vars(action)['option_strings']
+            and vars(action)['option_strings'][0] == arg) \
+                or vars(action)['dest'] == arg:
+            parser._remove_action(action)
+
+    for action in parser._action_groups:
+        vars_action = vars(action)
+        var_group_actions = vars_action['_group_actions']
+        for x in var_group_actions:
+            if x.dest == arg:
+                var_group_actions.remove(x)
+                return
 
 if __name__ == '__main__':
-    opt = optionstest.TestOptions()
-    opt.parser.set_defaults(dataroot='functions/detect_result', name='formal_author',
-                            model='test', dataset_mode='single', norm='batch', which_epoch=300, gpu_ids=-1)
+    parser = argparse.ArgumentParser(
+                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    opt = Options(parser)
+    remove_option(opt.parser,'dataroot')
+
+    print(opt.parser.parse_args())
+    opt.parser.set_defaults(dataroot='detect_result', name='formal_author',checkpoints_dir='../checkpoints',
+                            model='test', dataset_mode='single', norm='batch', which_epoch=300, gpu_ids='-1')
+    print(opt.parser.parse_args())
     opt = opt.parse()
     opt.num_threads = 1   # test code only supports num_threads = 1
     opt.batch_size = 1  # test code only supports batch_size = 1
