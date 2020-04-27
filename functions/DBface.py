@@ -108,6 +108,11 @@ def detect_image(model, file):
 
     for obj in objs:
         print(obj.landmark)
+        f = open(dbfacecommon.common.file_name_no_suffix(file)+'land.txt','w')
+        for land in obj.landmark:
+            f.write("%d %d".format(land[0],land[1]))
+        f.close()
+
         facealligner(image,obj.landmark[1],obj.landmark[0])
         dbfacecommon.common.drawbbox(image, obj)
 
