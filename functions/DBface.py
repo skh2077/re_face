@@ -108,8 +108,8 @@ def detect_image(model, file):
 
     for obj in objs:
         print(obj.landmark)
+        facealligner(image,obj.landmark[1],obj.landmark[0])
         dbfacecommon.common.drawbbox(image, obj)
-        facealligner(image, obj.landmark[0],obj.landmark[1])
 
     dbfacecommon.common.imwrite("detect_result/" + dbfacecommon.common.file_name_no_suffix(file) + ".draw.jpg", image)
 
