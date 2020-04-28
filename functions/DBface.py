@@ -136,7 +136,7 @@ def image_demo():
 
     dbface.load("../DBFace/model/dbface.pth")
     print('loaded')
-    arr = os.listdir("detect_result")
+    arr = os.listdir("samples")
     for filename in arr:
         print(filename)
-        detect_image(dbface, "detect_result/"+filename)
+        detect_image(dbface, "samples/"+filename)
