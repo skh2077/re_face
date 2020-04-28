@@ -38,8 +38,8 @@ def segment(path):
   img = Image.open(path)
   plt.imshow(img); plt.axis('off'); plt.show()
   # Comment the Resize and CenterCrop for better inference results
-  trf = T.Compose([T.Resize(256), 
-                   T.CenterCrop(224), 
+  trf = T.Compose([T.Resize(512), 
+                   T.CenterCrop(512), 
                    T.ToTensor(), 
                    T.Normalize(mean = [0.485, 0.456, 0.406], 
                                std = [0.229, 0.224, 0.225])])
@@ -47,5 +47,7 @@ def segment(path):
   out = net(inp)['out']
   om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
   rgb = decode_segmap(om)
+  rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2GRAY)
+
   cv2.imwrite(path+'.png',rgb)
   plt.imshow(rgb); plt.axis('off'); plt.show()
