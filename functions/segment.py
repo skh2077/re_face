@@ -15,7 +15,7 @@ def decode_segmap(image, nc=21):
                # 6=bus, 7=car, 8=cat, 9=chair, 10=cow
                (0, 128, 128), (128, 128, 128), (64, 0, 0), (192, 0, 0), (64, 128, 0),
                # 11=dining table, 12=dog, 13=horse, 14=motorbike, 15=person
-               (192, 128, 0), (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
+               (192, 128, 0), (64, 0, 128), (192, 0, 128), (64, 128, 128), (255, 255, 255),
                # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
                (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0), (0, 64, 128)])
 
@@ -25,6 +25,7 @@ def decode_segmap(image, nc=21):
 
   for l in range(0, nc):
     idx = image == l
+    print(image)
     r[idx] = label_colors[l, 0]
     g[idx] = label_colors[l, 1]
     b[idx] = label_colors[l, 2]
@@ -46,5 +47,5 @@ def segment(path):
   out = net(inp)['out']
   om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
   rgb = decode_segmap(om)
-  cv2.imwrite('segmented.png',rgb)
+  cv2.imwrite(path+'.png',rgb)
   plt.imshow(rgb); plt.axis('off'); plt.show()
