@@ -66,8 +66,7 @@ if __name__ == '__main__':
     remove_option(opt.parser,'dataroot')
 
     print(opt.parser.parse_args())
-    opt.parser.set_defaults(dataroot='detect_result', name='formal_author',checkpoints_dir='../checkpoints',
-                            model='test', dataset_mode='single', norm='batch', which_epoch=300, gpu_ids='-1')
+    opt.parser.set_defaults(dataroot='detect_result', name='formal_author',checkpoints_dir='../checkpoints',lm_dir='landmarks',bg_dir='masks', model='test', dataset_mode='single', norm='batch', which_epoch=300, gpu_ids='-1')
     print(opt.parser.parse_args())
     opt = opt.parse()
     opt.use_local = True

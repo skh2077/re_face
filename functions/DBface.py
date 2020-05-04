@@ -69,7 +69,7 @@ def detect(model, image, threshold=0.4, nms_iou=0.5):
         objs.append(dbfacecommon.common.BBox(0, xyrb=xyrb, score=score, landmark=box_landmark))
     return nms(objs, iou=nms_iou)
 
-def facealligner(image, leftEyeCenter,rightEyeCenter,desiredLeftEye=(0.35, 0.35),desiredFaceWidth=512, desiredFaceHeight=512):
+def facealligner(image, leftEyeCenter,rightEyeCenter,file,desiredLeftEye=(0.35, 0.35),desiredFaceWidth=512, desiredFaceHeight=512):
 
     dY = rightEyeCenter[1] - leftEyeCenter[1]
     dX = rightEyeCenter[0] - leftEyeCenter[0]
@@ -97,7 +97,7 @@ def facealligner(image, leftEyeCenter,rightEyeCenter,desiredLeftEye=(0.35, 0.35)
     (w, h) = (desiredFaceWidth, desiredFaceHeight)
     output = cv2.warpAffine(image, M, (w, h),
         flags=cv2.INTER_CUBIC)
-    cv2.imwrite("detect_result/" + 'alligned' + ".png", output)
+    cv2.imwrite("detect_result/" +dbfacecommon.common.file_name_no_suffix(file)+ 'alligned' + ".png", output)
 
     return output
 
@@ -108,15 +108,22 @@ def detect_image(model, file):
 
     for obj in objs:
         print(obj.landmark)
-        f = open(dbfacecommon.common.file_name_no_suffix(file)+'land.txt','w')
+        f = open('landmarks/'+dbfacecommon.common.file_name_no_suffix(file)+'.txt','w')
         for land in obj.landmark:
-            f.write("%d %d".format(land[0],land[1]))
+            print(land[0],land[1])
+            f.write("{} {}\n".format(int(land[0]),int(land[1])))
         f.close()
 
-        facealligner(image,obj.landmark[1],obj.landmark[0])
+        objts = detect(model,facealligner(image,obj.landmark[1],obj.landmark[0],file))
+        for objt in objts:
+            f = open('landmarks/'+dbfacecommon.common.file_name_no_suffix(file)+'alligned.txt','w')
+            for land in objt.landmark:
+                f.write("{} {}\n".format(int(land[0]),int(land[1])))
+            f.close()
+
         dbfacecommon.common.drawbbox(image, obj)
 
-    dbfacecommon.common.imwrite("detect_result/" + dbfacecommon.common.file_name_no_suffix(file) + ".draw.jpg", image)
+    dbfacecommon.common.imwrite("detect_results/" + dbfacecommon.common.file_name_no_suffix(file) + ".draw.jpg", image)
 
 
 def image_demo():
@@ -129,7 +136,7 @@ def image_demo():
 
     dbface.load("../DBFace/model/dbface.pth")
     print('loaded')
-    arr = os.listdir("detect_result")
+    arr = os.listdir("detect_result/")
     for filename in arr:
         print(filename)
         detect_image(dbface, "detect_result/"+filename)

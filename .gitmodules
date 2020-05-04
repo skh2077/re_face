@@ -10,3 +10,4 @@
 [submodule "DBFace"]
 	path = DBFace
 	url = https://github.com/dlunion/DBFace.git
+	ignore = dirty
