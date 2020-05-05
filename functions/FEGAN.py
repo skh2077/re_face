@@ -1,12 +1,5 @@
-import importlib
-import os
-import sys
-import time
+import functions.dependency_imports
 
-import cv2
-import numpy as np
-from matplotlib import pyplot as plt
-from PyQt5.QtGui import QImage, QPixmap
 sys.path.append('..')
 fegan = __import__('SC-FEGAN.utils.config')
 from model import Model
@@ -24,7 +17,7 @@ class Ex:
         self.mat_img = None
 
 
-    def open(self,fileName):
+    def open(self,image = None,fileName=None):
         if fileName:
             mat_img = cv2.imread(fileName)
             # redbrush = QBrush(Qt.red)
@@ -38,6 +31,12 @@ class Ex:
             print(mat_img)
             plt.imshow(mat_img, interpolation='nearest')
             plt.show()
+        elif image:
+            mat_img = cv2.resize(image, (512, 512), interpolation=cv2.INTER_CUBIC)
+            mat_img = mat_img/127.5 - 1
+            self.mat_img = np.expand_dims(mat_img,axis=0)
+
+
 
     def color_change_mode(self):
         self.dlg.exec_()
@@ -45,10 +44,10 @@ class Ex:
         self.pushButton_4.setStyleSheet("background-color: %s;" % self.color)
         self.scene.get_stk_color(self.color)
 
-    def complete(self,mask,sketch,stroke):
-        mask = self.make_mask(mask)
-        sketch = self.make_sketch(sketch)
-        stroke = self.make_stroke(stroke)
+    def complete(self,mask,sketch,stroke,read):
+        mask = self.make_mask(mask,read)
+        sketch = self.make_sketch(sketch,read)
+        stroke = self.make_stroke(stroke,read)
 
         noise = self.make_noise()
 
@@ -84,9 +83,12 @@ class Ex:
         noise = np.expand_dims(noise,axis=0)
         return noise
 
-    def make_mask(self, masksrc):
+    def make_mask(self, masksrc, read=True):
         if masksrc:
-            src = cv2.imread(masksrc)
+            if read:
+                src = cv2.imread(masksrc)
+            else:
+                src = masksrc
             src = cv2.resize(src, (512, 512), interpolation=cv2.INTER_CUBIC)
             dst = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             dst = cv2.bitwise_not(dst)
@@ -105,9 +107,12 @@ class Ex:
             mask = np.expand_dims(mask,axis=0)
         return mask
 
-    def make_sketch(self, sketchsrc): #black line
+    def make_sketch(self, sketchsrc, read=True): #black line
         if sketchsrc:
-            src = cv2.imread(sketchsrc)
+            if read:
+                src = cv2.imread(sketchsrc)
+            else:
+                src = sketchsrc            
             src = cv2.resize(src, (512, 512), interpolation=cv2.INTER_CUBIC)
             dst = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             dst = cv2.bitwise_not(dst)
@@ -128,10 +133,13 @@ class Ex:
             sketch = np.expand_dims(sketch,axis=0)
         return sketch
 
-    def make_stroke(self, strokesrc): #RGB format
+    def make_stroke(self, strokesrc, read=True): #RGB format
         if strokesrc:
             stroke = np.zeros((512,512,3))
-            src = cv2.imread(strokesrc,flags =cv2.IMREAD_COLOR)
+            if read:
+                src = cv2.imread(strokesrc,flags =cv2.IMREAD_COLOR)
+            else:
+                src = strokesrc
 #            src = cv2.cvtColor(src, cv2.COLOR_BGR2RGB)
             src = cv2.bitwise_not(src)
 
@@ -153,11 +161,14 @@ class Ex:
         return stroke
 
 
-if __name__ == '__main__':
+def execute_FEGAN(mask,sketch,stroke,image=None,read=True):
     config = fegan.utils.config.Config('config.yaml')
     os.environ["CUDA_VISIBLE_DEVICES"] = str(config.GPU_NUM)
     model = Model(config)
 
     ex = Ex(model, config)
-    ex.open('img_1701.png')
-    ex.complete('noname.png','img_1701_fake_B.png','color.png')
+    if image:
+        ex.open(image = image)
+    else:
+        ex.open('img_1701.png')
+    ex.complete(mask,sketch,stroke,read)

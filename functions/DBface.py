@@ -1,10 +1,4 @@
-import numpy as np
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-import cv2
-import sys
-import os
+import functions.dependency_imports
 HAS_CUDA = torch.cuda.is_available()
 sys.path.append('..')
 dbfacemod = __import__('DBFace.model.DBFace')
@@ -140,3 +134,33 @@ def image_demo():
     for filename in arr:
         print(filename)
         detect_image(dbface, "detect_result/"+filename)
+
+def detect_singleimage(image,name):
+    dbface = dbfacemod.model.DBFace.DBFace()
+    dbface.eval()
+
+    if HAS_CUDA:
+        dbface.cuda()
+
+    model=dbface.load("../DBFace/model/dbface.pth")
+
+    objs = detect(model, image)
+
+    for obj in objs:
+        print(obj.landmark)
+        f = open('landmarks/'+name+'.txt','w')
+        for land in obj.landmark:
+            print(land[0],land[1])
+            f.write("{} {}\n".format(int(land[0]),int(land[1])))
+        f.close()
+
+        objts = detect(model,facealligner(image,obj.landmark[1],obj.landmark[0],name))
+        for objt in objts:
+            f = open('landmarks/'+name+'alligned.txt','w')
+            for land in objt.landmark:
+                f.write("{} {}\n".format(int(land[0]),int(land[1])))
+            f.close()
+
+        dbfacecommon.common.drawbbox(image, obj)
+    return image
+    dbfacecommon.common.imwrite("detect_results/" + name + ".draw.jpg", image)
