@@ -1,5 +1,9 @@
-from functions import DBFace,segment,FEGAN, APDrawingGan
-import functions.dependency_imports
+from __future__ import absolute_import
+import DBface
+import segment
+import FEGAN
+import APDrawingGan
+import dependency_imports
 from google.cloud import storage
 
 client = storage.Client()

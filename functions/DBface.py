@@ -1,4 +1,4 @@
-import functions.dependency_imports
+import dependency_imports
 HAS_CUDA = torch.cuda.is_available()
 sys.path.append('..')
 dbfacemod = __import__('DBFace.model.DBFace')
