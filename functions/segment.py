@@ -33,10 +33,10 @@ def decode_segmap(image, nc=21):
   rgb = np.stack([r, g, b], axis=2)
   return rgb
 
-def segment(path):
+def segment(img,path):
   net = models.segmentation.fcn_resnet101(pretrained=True).eval()
-  img = Image.open(path)
-  plt.imshow(img); plt.axis('off'); plt.show()
+  #img = Image.open(path)
+  #plt.imshow(img); plt.axis('off'); plt.show()
   # Comment the Resize and CenterCrop for better inference results
   trf = T.Compose([T.Resize(512), 
                    T.CenterCrop(512), 
@@ -49,5 +49,8 @@ def segment(path):
   rgb = decode_segmap(om)
   rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2GRAY)
 
-  cv2.imwrite(path+'.png',rgb)
-  plt.imshow(rgb); plt.axis('off'); plt.show()
+  if path:
+    cv2.imwrite(path,rgb)
+    #plt.imshow(rgb); plt.axis('off'); plt.show()
+  else:
+    return rgb
